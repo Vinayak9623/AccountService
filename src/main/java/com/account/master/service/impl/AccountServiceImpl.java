@@ -57,6 +57,21 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public ResponseEntity<?> getAccountById(UUID accountId) {
+        var response=new ApiResponse<>();
+        Account account = accountRepository.findById(accountId).orElseThrow(() -> new RuntimeException("Account not found with given Id: " + accountId));
+        AccountDto dto = AccountDto.builder().accountId(account.getAccountId())
+                .userId(account.getUserId())
+                .accountNumber(account.getAccountNumber())
+                .routingNumber(account.getRoutingNumber())
+                .accountType(account.getAccountType())
+                .balance(account.getBalance())
+                .status(account.getStatus()).build();
+        response.responseMethod(HttpStatus.OK.value(), "Account get successfully",dto,null);
+        return ResponseEntity.ok(response);
+    }
+
+    @Override
     public ResponseEntity<?> getAccountList(int page, int size,String sortField,String sortDir) {
         var response=new ApiResponse<>();
       Sort sort =sortDir.equalsIgnoreCase("asc")

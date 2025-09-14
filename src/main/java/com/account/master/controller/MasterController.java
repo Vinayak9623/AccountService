@@ -22,6 +22,11 @@ public class MasterController {
         return service.createAccount(accountDto);
     }
 
+    @GetMapping("/getAccount/{accountId}")
+    public ResponseEntity<?> getAccountById(@PathVariable("accountId") UUID accountId){
+        return service.getAccountById(accountId);
+    }
+
     @GetMapping("/getUserList")
     public ResponseEntity<?> getAccountList(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size, @RequestParam(defaultValue = "accountId") String sortfield, @RequestParam(defaultValue = "asc") String sortDir) {
         return service.getAccountList(page, size, sortfield, sortDir);
