@@ -1,6 +1,7 @@
 package com.account.master.controller;
 
 import com.account.dto.AccountDto;
+import com.account.dto.UpdateBalanceDto;
 import com.account.master.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -41,6 +42,11 @@ public class MasterController {
     @GetMapping("/getBalance/{accountId}")
     public ResponseEntity<?> getBalanceByAccountId(@PathVariable("accountId") UUID accountId){
         return service.getAccountBalance(accountId);
+    }
+
+    @PutMapping("/updateBalance/{accountId}")
+    public ResponseEntity<?> updateBankBalance(@PathVariable("accountId") UUID accountId, @RequestBody UpdateBalanceDto balanceDto){
+        return service.updateAccountBalance(accountId, balanceDto);
     }
 
 }

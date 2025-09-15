@@ -3,6 +3,7 @@ package com.account.master.service.impl;
 import com.account.client.MicroClient;
 import com.account.common.ApiResponse;
 import com.account.dto.AccountDto;
+import com.account.dto.UpdateBalanceDto;
 import com.account.dto.UserRequest;
 import com.account.master.entity.Account;
 import com.account.master.repository.AccountRepository;
@@ -31,34 +32,34 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public ResponseEntity<?> createAccount(AccountDto accountDto) {
-     var response =new ApiResponse<>();
+        var response = new ApiResponse<>();
 
-     Account account;
-     account=Objects.nonNull(accountDto.getAccountId())?
-             accountRepository
-                .findById(accountDto
-                        .getAccountId())
-                .orElseThrow(() ->
-                        new RuntimeException("Account not found"))
-             :new Account();
+        Account account;
+        account = Objects.nonNull(accountDto.getAccountId()) ?
+                accountRepository
+                        .findById(accountDto
+                                .getAccountId())
+                        .orElseThrow(() ->
+                                new RuntimeException("Account not found"))
+                : new Account();
 
-         UserRequest user = client.getUserById(accountDto.getUserId());
+        UserRequest user = client.getUserById(accountDto.getUserId());
 
-         account.setUserId(user.getId());
-         account.setAccountNumber(accountDto.getAccountNumber());
-         account.setRoutingNumber(accountDto.getRoutingNumber());
-         account.setAccountType(accountDto.getAccountType());
-         account.setBalance(accountDto.getBalance());
-         account.setStatus(accountDto.getStatus());
-         accountRepository.save(account);
-        String message=Objects.isNull(accountDto.getAccountId())?"Account created successfully":"Account updated successfully";
-         response.responseMethod(HttpStatus.OK.value(),message ,null,null);
+        account.setUserId(user.getId());
+        account.setAccountNumber(accountDto.getAccountNumber());
+        account.setRoutingNumber(accountDto.getRoutingNumber());
+        account.setAccountType(accountDto.getAccountType());
+        account.setBalance(accountDto.getBalance());
+        account.setStatus(accountDto.getStatus());
+        accountRepository.save(account);
+        String message = Objects.isNull(accountDto.getAccountId()) ? "Account created successfully" : "Account updated successfully";
+        response.responseMethod(HttpStatus.OK.value(), message, null, null);
         return ResponseEntity.ok(response);
     }
 
     @Override
     public ResponseEntity<?> getAccountById(UUID accountId) {
-        var response=new ApiResponse<>();
+        var response = new ApiResponse<>();
         Account account = accountRepository.findById(accountId).orElseThrow(() -> new RuntimeException("Account not found with given Id: " + accountId));
         AccountDto dto = AccountDto.builder().accountId(account.getAccountId())
                 .userId(account.getUserId())
@@ -67,16 +68,16 @@ public class AccountServiceImpl implements AccountService {
                 .accountType(account.getAccountType())
                 .balance(account.getBalance())
                 .status(account.getStatus()).build();
-        response.responseMethod(HttpStatus.OK.value(), "Account get successfully",dto,null);
+        response.responseMethod(HttpStatus.OK.value(), "Account get successfully", dto, null);
         return ResponseEntity.ok(response);
     }
 
     @Override
-    public ResponseEntity<?> getAccountList(int page, int size,String sortField,String sortDir) {
-        var response=new ApiResponse<>();
-      Sort sort =sortDir.equalsIgnoreCase("asc")
-              ? Sort.by(sortField).ascending():
-              Sort.by(sortField).descending();
+    public ResponseEntity<?> getAccountList(int page, int size, String sortField, String sortDir) {
+        var response = new ApiResponse<>();
+        Sort sort = sortDir.equalsIgnoreCase("asc")
+                ? Sort.by(sortField).ascending() :
+                Sort.by(sortField).descending();
 
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<Account> AccountList = accountRepository.findAll(pageable);
@@ -88,7 +89,7 @@ public class AccountServiceImpl implements AccountService {
                 .balance(x.getBalance())
                 .status(x.getStatus()).build()
         ).toList();
-        response.responseMethod(HttpStatus.OK.value(), "Account list get successfully",list,null);
+        response.responseMethod(HttpStatus.OK.value(), "Account list get successfully", list, null);
         return ResponseEntity.ok(response);
     }
 
@@ -113,9 +114,19 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public ResponseEntity<?> getAccountBalance(UUID accountId) {
-        var response=new ApiResponse<>();
-      Double balance =accountRepository.getAccountBalanceByAccountId(accountId);
-      response.responseMethod(HttpStatus.OK.value(),"Balance fetch successfully",balance,null);
+        var response = new ApiResponse<>();
+        Double balance = accountRepository.getAccountBalanceByAccountId(accountId);
+        response.responseMethod(HttpStatus.OK.value(), "Balance fetch successfully", balance, null);
+        return ResponseEntity.ok(response);
+    }
+
+    @Override
+    public ResponseEntity<?> updateAccountBalance(UUID accountId, UpdateBalanceDto balanceDto) {
+        var response = new ApiResponse<>();
+        Account account = accountRepository.findById(accountId).orElseThrow(() -> new RuntimeException("Account not found Exception"));
+        account.setBalance(balanceDto.getBalance());
+        accountRepository.save(account);
+        response.responseMethod(HttpStatus.OK.value(), "balance update successfully", null, null);
         return ResponseEntity.ok(response);
     }
 

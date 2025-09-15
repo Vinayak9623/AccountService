@@ -1,6 +1,7 @@
 package com.account.master.service;
 
 import com.account.dto.AccountDto;
+import com.account.dto.UpdateBalanceDto;
 import org.springframework.http.ResponseEntity;
 
 import java.util.UUID;
@@ -12,6 +13,7 @@ public interface AccountService {
     ResponseEntity<?> getAccountList(int page , int size,String sortfield,String sortDir);
     ResponseEntity<?> InactiveAccount(UUID accountId);
     ResponseEntity<?> getAccountBalance(UUID accountId);
+    ResponseEntity<?> updateAccountBalance(UUID accountId, UpdateBalanceDto balanceDto);
 
 
 
