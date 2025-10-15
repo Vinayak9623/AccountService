@@ -3,10 +3,12 @@ package com.account.master.controller;
 import com.account.dto.AccountDto;
 import com.account.dto.UpdateBalanceDto;
 import com.account.master.service.AccountService;
+import com.account.record.TransferBalance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.security.auth.login.AccountNotFoundException;
 import java.util.UUID;
 
 
@@ -28,7 +30,7 @@ public class MasterController {
         return service.getAccountById(accountId);
     }
 
-    @GetMapping("/getUserList")
+    @GetMapping("/getAccountList")
     public ResponseEntity<?> getAccountList(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size, @RequestParam(defaultValue = "accountId") String sortfield, @RequestParam(defaultValue = "asc") String sortDir) {
         return service.getAccountList(page, size, sortfield, sortDir);
     }
@@ -47,6 +49,11 @@ public class MasterController {
     @PutMapping("/updateBalance/{accountId}")
     public ResponseEntity<?> updateBankBalance(@PathVariable("accountId") UUID accountId, @RequestBody UpdateBalanceDto balanceDto){
         return service.updateAccountBalance(accountId, balanceDto);
+    }
+
+    @PostMapping("/transfer")
+    public ResponseEntity<?> transferBalance(@RequestBody TransferBalance balance) throws AccountNotFoundException {
+        return service.tranferAccount(balance);
     }
 
 }

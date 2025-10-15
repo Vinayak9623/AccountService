@@ -8,6 +8,7 @@ import com.account.dto.UserRequest;
 import com.account.master.entity.Account;
 import com.account.master.repository.AccountRepository;
 import com.account.master.service.AccountService;
+import com.account.record.TransferBalance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,8 +18,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import javax.security.auth.login.AccountNotFoundException;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -129,5 +132,35 @@ public class AccountServiceImpl implements AccountService {
         response.responseMethod(HttpStatus.OK.value(), "balance update successfully", null, null);
         return ResponseEntity.ok(response);
     }
+
+    @Override
+    public ResponseEntity<?> tranferAccount(TransferBalance balance) throws AccountNotFoundException {
+        var response = new ApiResponse<>();
+
+        if (balance.balance() == null || balance.balance() <= 0) {
+            response.responseMethod(HttpStatus.BAD_REQUEST.value(), "Invalid transfer amount", null, null);
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        Account debiterAccount = accountRepository.findById(balance.fromAccountId())
+                .orElseThrow(() -> new AccountNotFoundException("From account not found"));
+
+        Account crediterAccount = accountRepository.findById(balance.toAccountId())
+                .orElseThrow(() -> new AccountNotFoundException("To account not found"));
+
+        if (debiterAccount.getBalance() < balance.balance()) {
+            response.responseMethod(HttpStatus.CONFLICT.value(), "Insufficient balance", null, null);
+            return ResponseEntity.ok(response);
+        }
+        debiterAccount.setBalance(debiterAccount.getBalance() - balance.balance());
+        crediterAccount.setBalance(crediterAccount.getBalance() + balance.balance());
+
+        accountRepository.save(debiterAccount);
+        accountRepository.save(crediterAccount);
+
+        response.responseMethod(HttpStatus.OK.value(), "Balance transferred successfully", null, null);
+        return ResponseEntity.ok(response);
+    }
+
 
 }
